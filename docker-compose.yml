@@ -1,0 +1,73 @@
+# For more information: https://laravel.com/docs/sail
+version: '3.5'
+services:
+    proxy_checker.test:
+        container_name: proxy_checker.test
+        build:
+            context: ./docker/8.1
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.1/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            SERVER_NAME: 'host.docker.internal'
+            SERVER_PORT: '80'
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - proxy_checker-network
+        depends_on:
+            - proxy_checker-pgsql
+
+    proxy_checker-pgsql:
+        container_name: proxy_checker-pgsql
+        image: 'postgres:14'
+        ports:
+            - '${FORWARD_DB_PORT:-15432}:5432'
+        environment:
+            PGPASSWORD: '${DB_PASSWORD:-secret}'
+            POSTGRES_DB: '${DB_DATABASE}'
+            POSTGRES_USER: '${DB_USERNAME}'
+            POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+        volumes:
+            - 'proxy_checker-pgsql:/var/lib/postgresql/data'
+            - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+        networks:
+            - proxy_checker-network
+        healthcheck:
+            test: ["CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}"]
+            retries: 3
+            timeout: 5s
+
+    proxy_checker-redis:
+        container_name: proxy_checker-redis
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'proxy_checker-redis:/data'
+        networks:
+            - proxy_checker-network
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            retries: 3
+            timeout: 5s
+
+networks:
+    proxy_checker-network:
+        name: proxy_checker-network
+        driver: bridge
+volumes:
+    proxy_checker-pgsql:
+        driver: local
+    proxy_checker-redis:
+        driver: local
