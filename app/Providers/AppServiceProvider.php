@@ -2,10 +2,18 @@
 
 namespace App\Providers;
 
+use App\Contracts\ProxyCheckerServiceContract;
+use App\Services\ProxyCheckers\ProxyCheckService;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+
+    public array $singletons = [
+        ProxyCheckerServiceContract::class => ProxyCheckService::class,
+    ];
+
     /**
      * Register any application services.
      */
@@ -19,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Paginator::useBootstrapFive();
+        Paginator::useBootstrapFour();
     }
 }

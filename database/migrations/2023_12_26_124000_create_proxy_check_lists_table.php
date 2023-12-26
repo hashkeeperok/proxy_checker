@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('proxy_checks', function (Blueprint $table) {
+        Schema::create('proxy_check_lists', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('check_time');
+            $table->string('check_time')->nullable();
             $table->unsignedInteger('count');
-            $table->unsignedInteger('available_count');
-            $table->timestamp('created_at');
+            $table->json('proxy_list');
+            $table->timestamps();
         });
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('proxy_checks');
+        Schema::dropIfExists('proxy_check_lists');
     }
 };

@@ -31,6 +31,11 @@ alias sail='[ -f sail ] && bash sail || bash vendor/bin/sail'
 ./vendor/bin/sail up -d
 ```
 
+**Поднять фронт:**
+```bash
+./vendor/bin/sail npm run dev
+```
+
 **Выполнить миграции: (только на dev!!!)**
 ```bash
 ./vendor/bin/sail artisan migrate --seed

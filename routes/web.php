@@ -13,6 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home.index');
+Route::post('/', [\App\Http\Controllers\ProxyCheckListController::class, 'store'])->name('proxy_check_list.index');
+Route::get('/proxy-check-list/{proxy_check_list}', [\App\Http\Controllers\ProxyCheckListController::class, 'show'])->name('proxy_check_list.show');
